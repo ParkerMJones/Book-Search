@@ -15,16 +15,13 @@ const PORT = process.env.PORT || 3001;
 //   context: authMiddleware
 // });
 
-async function startServer() {
-  apolloServer = new ApolloServer({
-      typeDefs,
-      resolvers,
-      context: authMiddleware
-  });
-  await apolloServer.start();
-  apolloServer.applyMiddleware({ app });
-}
-startServer();
+const server = new ApolloServer({
+  typeDefs,
+  resolvers,
+  context: authMiddleware
+});
+
+server.applyMiddleware({ app });
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
