@@ -1,11 +1,11 @@
+  
 import React, { useState } from 'react';
-import Auth from '../utils/auth';
 import { Form, Button, Alert } from 'react-bootstrap';
+import { useMutation } from '@apollo/client';
 import { ADD_USER } from '../utils/mutations';
-import { useMutation } from '@apollo/react-hooks';
+import Auth from '../utils/auth';
 
 const SignupForm = () => {
-    const [addUser, { error }] = useMutation(ADD_USER);
     // set initial form state
     const [userFormData, setUserFormData] = useState({ username: '', email: '', password: '' });
     // set state for form validation
@@ -13,31 +13,34 @@ const SignupForm = () => {
     // set state for alert
     const [showAlert, setShowAlert] = useState(false);
 
+    const [addUser] = useMutation(ADD_USER);
+
     const handleInputChange = (event) => {
         const { name, value } = event.target;
         setUserFormData({ ...userFormData, [name]: value });
     };
 
-    const handleFormSubmit = async event => {
+    const handleFormSubmit = async (event) => {
         event.preventDefault();
 
         // check if form has everything (as per react-bootstrap docs)
-        // const form = event.currentTarget;
-        // if (form.checkValidity() === false) {
-        //   event.preventDefault();
-        //   event.stopPropagation();
-        // }
+        const form = event.currentTarget;
+        if (form.checkValidity() === false) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
 
         try {
             const { data } = await addUser({
-                variables: {...userFormData}
+                variables: { ...userFormData }
             });
 
             Auth.login(data.addUser.token);
-        } catch (e) {
-            console.error(e);
+        } catch (err) {
+            console.error(err);
             setShowAlert(true);
         }
+
 
         setUserFormData({
             username: '',
@@ -53,7 +56,7 @@ const SignupForm = () => {
                 {/* show alert if server response is bad */}
                 <Alert dismissible onClose={() => setShowAlert(false)} show={showAlert} variant='danger'>
                     Something went wrong with your signup!
-                </Alert>
+        </Alert>
 
                 <Form.Group>
                     <Form.Label htmlFor='username'>Username</Form.Label>
@@ -98,8 +101,7 @@ const SignupForm = () => {
                     type='submit'
                     variant='success'>
                     Submit
-                </Button>
-                {error && <div>Sign up failed</div>}
+        </Button>
             </Form>
         </>
     );
